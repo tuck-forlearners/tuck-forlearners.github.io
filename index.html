@@ -3,19 +3,499 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tuck for Learners</title>
+<title>Tuck for Learners · Study the questions you actually missed</title>
+<meta name="description" content="Tuck saves the homework questions you've answered on McGraw Hill SmartBook and Norton InQuizitive, so you can study the ones you missed before exams. Free, private, and stays in your browser.">
 <style>
-  body { margin: 0; background: #FFFFFF; color: #1D2B4A; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 17px; line-height: 1.6; }
-  main { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
-  h1 { font-size: 32px; line-height: 1.2; margin: 0 0 16px; }
-  a { color: #B8401A; }
+  /* Fonts are bundled in assets/fonts/ (SIL Open Font License, see the OFL-*.txt files); nothing loads from other servers. */
+  @font-face { font-family: 'Fredoka'; src: url('assets/fonts/fredoka-latin-wght-normal.woff2') format('woff2'); font-weight: 300 700; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: 'Fredoka'; src: url('assets/fonts/fredoka-latin-ext-wght-normal.woff2') format('woff2'); font-weight: 300 700; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+  @font-face { font-family: 'Figtree'; src: url('assets/fonts/figtree-latin-wght-normal.woff2') format('woff2'); font-weight: 300 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: 'Figtree'; src: url('assets/fonts/figtree-latin-ext-wght-normal.woff2') format('woff2'); font-weight: 300 900; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+  :root {
+    --ink: #1D2B4A;
+    --muted: #45506A;
+    --tomato: #E8572A;
+    --tomato-text: #B8401A;
+    --yellow: #FFD23F;
+    --yellow-tint: #FFF3B8;
+    --peach: #FFD9C7;
+    --peach-text: #7A2A0E;
+    --mint: #7CC6A4;
+    --mint-tint: #D3F0E2;
+    --mint-text: #0F2A1E;
+    --paper: #FFFFFF;
+    --head: 'Fredoka', ui-rounded, system-ui, sans-serif;
+    --body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 18px; line-height: 1.55; }
+  a { color: var(--tomato-text); }
+  a:hover { color: var(--ink); }
+  img { max-width: 100%; display: block; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3 { font-family: var(--head); line-height: 1.08; margin: 0; }
+  h2 { font-size: clamp(34px, 4.5vw, 52px); font-weight: 700; }
+  h3 { font-size: 24px; font-weight: 600; }
+  p { margin: 0; }
+  .eyebrow { font-family: var(--body); font-weight: 700; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--tomato-text); }
+
+  /* sticker components */
+  .card { background: var(--paper); border: 3px solid var(--ink); border-radius: 20px; box-shadow: 6px 6px 0 var(--ink); }
+  .note { border: 2.5px solid var(--ink); border-radius: 8px; box-shadow: 4px 4px 0 var(--ink); padding: 14px 16px; font-weight: 700; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 24px; border: 3px solid var(--ink); border-radius: 14px; background: var(--yellow); color: var(--ink); font-family: var(--head); font-weight: 700; font-size: 19px; text-decoration: none; box-shadow: 4px 4px 0 var(--ink); cursor: pointer; transition: transform .08s, box-shadow .08s; }
+  .btn:hover { color: var(--ink); transform: translate(-1px,-1px); box-shadow: 5px 5px 0 var(--ink); }
+  .btn:active { transform: translate(4px,4px); box-shadow: 0 0 0 var(--ink); }
+  .btn.secondary { background: var(--paper); }
+  .btn[aria-disabled="true"] { cursor: default; }
+  .pill { display: inline-block; font-size: 13px; font-weight: 700; padding: 3px 10px; border: 2px solid var(--ink); border-radius: 999px; background: var(--mint); color: var(--mint-text); }
+
+  /* nav */
+  nav { position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,.92); backdrop-filter: blur(8px); border-bottom: 3px solid var(--ink); }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 16px; }
+  .brand { display: flex; white-space: nowrap; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-family: var(--head); font-weight: 700; font-size: 26px; }
+  .brand img { width: 44px; height: 44px; object-fit: contain; }
+  .brand small { font-weight: 600; font-size: 15px; color: var(--tomato-text); margin-left: 2px; }
+  .navlinks { display: flex; gap: 24px; align-items: center; }
+  .navlinks a { color: var(--ink); text-decoration: none; font-weight: 600; font-size: 16px; }
+  .navlinks a:hover { text-decoration: underline; text-decoration-thickness: 3px; text-decoration-color: var(--yellow); }
+
+  /* hero */
+  .hero { background: var(--yellow); border-bottom: 3px solid var(--ink); overflow: hidden; }
+  .hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; padding-top: 72px; padding-bottom: 88px; }
+  .hero h1 { font-size: clamp(40px, 5.4vw, 68px); font-weight: 700; }
+  .hero h1 em { font-style: normal; background: var(--paper); border: 3px solid var(--ink); border-radius: 12px; padding: 0 12px; box-shadow: 5px 5px 0 var(--ink); display: inline-block; transform: rotate(-2deg); margin-top: 8px; white-space: nowrap; }
+  .hero .lead { font-size: 21px; margin-top: 28px; max-width: 520px; }
+  .hero .ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 32px; }
+  .hero .fine { font-size: 15px; color: var(--muted); margin-top: 16px; }
+  .hero .fine strong { color: var(--ink); }
+
+  /* hero demo */
+  .demo-stage { position: relative; height: 470px; }
+  .demo-mascot { position: absolute; right: -10px; bottom: -20px; width: 210px; transform: rotate(4deg); z-index: 3; }
+  .q-card { position: absolute; left: 0; top: 10px; width: min(420px, 92%); padding: 22px; z-index: 2; animation: qcard 9s infinite; transform-origin: 70% 90%; }
+  .q-card .q-meta { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 10px; }
+  .q-card .q-text { font-weight: 700; font-size: 18px; line-height: 1.35; margin-bottom: 14px; }
+  .opt { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 14px; border: 2px solid #C9CEDA; border-radius: 12px; font-size: 16px; margin-top: 8px; background: var(--paper); }
+  .opt .mark { width: 20px; flex-shrink: 0; font-weight: 700; }
+  .opt.pick { animation: pick 9s infinite; }
+  .opt.right { animation: right 9s infinite; }
+  .toast { position: absolute; left: 30px; bottom: 40px; z-index: 4; display: flex; align-items: center; gap: 10px; background: var(--mint-tint); color: var(--mint-text); animation: toast 9s infinite; }
+  .shelf { position: absolute; right: 150px; bottom: 30px; display: flex; gap: 8px; z-index: 1; }
+  .shelf .note { width: 70px; height: 62px; padding: 6px; font-size: 12px; }
+  .cursor { position: absolute; width: 26px; height: 26px; z-index: 5; animation: cursor 9s infinite; pointer-events: none; }
+
+  @keyframes qcard {
+    0%, 52% { opacity: 1; transform: translate(0,0) rotate(-1.5deg) scale(1); }
+    64% { opacity: 1; transform: translate(170px, 250px) rotate(8deg) scale(.22); }
+    66%, 88% { opacity: 0; transform: translate(170px, 250px) rotate(8deg) scale(.22); }
+    96%, 100% { opacity: 1; transform: translate(0,0) rotate(-1.5deg) scale(1); }
+  }
+  @keyframes cursor {
+    0% { opacity: 0; left: 320px; top: 360px; }
+    8% { opacity: 1; left: 320px; top: 360px; }
+    20% { left: 170px; top: 172px; transform: scale(1); }
+    23% { transform: scale(.8); }
+    26% { transform: scale(1); left: 170px; top: 172px; }
+    46% { opacity: 1; }
+    52%, 100% { opacity: 0; left: 170px; top: 172px; }
+  }
+  @keyframes pick {
+    0%, 22% { background: var(--paper); border-color: #C9CEDA; color: var(--ink); }
+    24%, 90% { background: var(--peach); border-color: var(--ink); color: var(--peach-text); }
+    100% { background: var(--paper); border-color: #C9CEDA; color: var(--ink); }
+  }
+  @keyframes right {
+    0%, 30% { background: var(--paper); border-color: #C9CEDA; color: var(--ink); font-weight: 400; }
+    33%, 90% { background: var(--mint-tint); border-color: var(--ink); color: var(--mint-text); font-weight: 700; }
+    100% { background: var(--paper); border-color: #C9CEDA; color: var(--ink); }
+  }
+  @keyframes toast {
+    0%, 60% { opacity: 0; transform: translateY(16px) rotate(-2deg); }
+    66%, 86% { opacity: 1; transform: translateY(0) rotate(-2deg); }
+    94%, 100% { opacity: 0; transform: translateY(16px) rotate(-2deg); }
+  }
+  .opt .x-mark, .opt .c-mark { opacity: 0; }
+  .opt.pick .x-mark { animation: show1 9s infinite; }
+  .opt.right .c-mark { animation: show2 9s infinite; }
+  @keyframes show1 { 0%, 22% { opacity: 0 } 24%, 90% { opacity: 1 } 100% { opacity: 0 } }
+  @keyframes show2 { 0%, 30% { opacity: 0 } 33%, 90% { opacity: 1 } 100% { opacity: 0 } }
+
+  /* sections */
+  section { padding: 104px 0; }
+  .section-head { max-width: 680px; margin-bottom: 52px; }
+  .section-head p { font-size: 20px; color: var(--muted); margin-top: 16px; }
+
+  /* steps */
+  .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+  .step { padding: 28px; }
+  .step:nth-child(1) { background: var(--yellow-tint); transform: rotate(-1.5deg); }
+  .step:nth-child(2) { background: var(--peach); transform: rotate(1deg); }
+  .step:nth-child(3) { background: var(--mint-tint); transform: rotate(-.8deg); }
+  .step .num { font-family: var(--head); font-weight: 700; font-size: 56px; line-height: 1; }
+  .step h3 { margin-top: 12px; }
+  .step p { margin-top: 10px; font-size: 17px; }
+
+  /* try it */
+  .try { background: #F6F7FB; border-top: 3px solid var(--ink); border-bottom: 3px solid var(--ink); }
+  .try-grid { display: grid; grid-template-columns: 1.25fr .75fr; gap: 40px; align-items: start; }
+  .quiz { padding: 32px; }
+  .quiz .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .quiz .progress { font-size: 14px; font-weight: 700; color: var(--tomato-text); letter-spacing: .06em; }
+  .quiz .qtext { font-size: 22px; font-weight: 700; line-height: 1.35; }
+  .quiz .choices { margin-top: 18px; display: grid; gap: 10px; }
+  .choice { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 54px; padding: 0 16px; text-align: left; border: 2px solid var(--ink); border-radius: 12px; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 17px; cursor: pointer; transition: transform .08s; }
+  .choice:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--ink); }
+  .choice:disabled { cursor: default; }
+  .choice .key { width: 28px; height: 28px; border: 2px solid var(--ink); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .choice.is-right { background: var(--mint-tint); color: var(--mint-text); font-weight: 700; }
+  .choice.is-wrong { background: var(--peach); color: var(--peach-text); }
+  .choice .tag { margin-left: auto; font-size: 13px; font-weight: 700; }
+  .feedback { margin-top: 18px; padding: 16px 18px; border-radius: 12px; border: 2px dashed var(--ink); background: var(--yellow-tint); font-size: 16px; }
+  .feedback strong { font-family: var(--head); font-size: 20px; display: block; margin-bottom: 4px; }
+  .quiz .actions { margin-top: 20px; display: flex; justify-content: flex-end; }
+  .side { display: grid; gap: 20px; }
+  .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .tile { padding: 14px 10px; border: 2.5px solid var(--ink); border-radius: 8px; box-shadow: 3px 3px 0 var(--ink); }
+  .tile:nth-child(1) { background: var(--yellow-tint); transform: rotate(-2deg); }
+  .tile:nth-child(2) { background: var(--peach); transform: rotate(1.5deg); }
+  .tile:nth-child(3) { background: var(--mint-tint); transform: rotate(-1deg); }
+  .tile b { display: block; font-family: var(--head); font-size: 34px; line-height: 1; }
+  .tile span { font-size: 13px; font-weight: 700; }
+  .side .card { padding: 22px; }
+  .side h3 { font-size: 20px; }
+  .side p { font-size: 16px; color: var(--muted); margin-top: 8px; }
+  .done { text-align: center; padding: 20px 0 8px; }
+  .done img { width: 140px; margin: 0 auto 12px; }
+
+  /* modes */
+  .modes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+  .mode { padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+  .mode .viz { height: 110px; border-radius: 12px; border: 2px solid var(--ink); background: #F6F7FB; position: relative; overflow: hidden; }
+  .mode p { font-size: 16px; color: var(--muted); }
+  .mode.primary { background: var(--yellow); }
+  .mode.primary p { color: var(--ink); }
+  .viz .bar { position: absolute; left: 14px; right: 14px; height: 14px; border-radius: 7px; border: 2px solid var(--ink); background: var(--paper); }
+  .viz .chip { position: absolute; width: 38px; height: 30px; border: 2px solid var(--ink); border-radius: 6px; }
+
+  /* privacy */
+  .privacy-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 56px; align-items: center; }
+  .lock { padding: 36px; background: var(--mint-tint); transform: rotate(-1.5deg); }
+  .lock .big { font-family: var(--head); font-weight: 700; font-size: 40px; line-height: 1.1; }
+  .lock p { margin-top: 12px; font-size: 18px; color: var(--mint-text); }
+  .checks { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 14px; }
+  .checks li { display: flex; gap: 12px; align-items: flex-start; font-size: 18px; }
+  .checks li::before { content: "✓"; flex-shrink: 0; width: 28px; height: 28px; border: 2px solid var(--ink); border-radius: 8px; background: var(--yellow); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; margin-top: 1px; }
+
+  /* works with + final cta */
+  .works { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 24px; }
+  .works .note { background: var(--paper); font-size: 18px; }
+  .final { background: var(--ink); color: #F5F1E6; text-align: center; }
+  .final h2 { color: #F5F1E6; }
+  .final p { color: #D5DBEA; font-size: 20px; margin: 16px auto 0; max-width: 560px; }
+  .final .btn { margin-top: 32px; border-color: #070B16; box-shadow: 5px 5px 0 #070B16; }
+  .final img { width: 150px; margin: 0 auto 20px; }
+
+  footer { padding: 40px 0 56px; font-size: 15px; color: var(--muted); }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; }
+  footer nav { all: unset; display: flex; gap: 20px; flex-wrap: wrap; }
+  footer .legal { flex-basis: 100%; font-size: 13px; }
+
+  @media (max-width: 960px) {
+    .hero .wrap, .try-grid, .privacy-grid { grid-template-columns: 1fr; }
+    .demo-stage { height: 440px; }
+    .steps { grid-template-columns: 1fr; }
+    .modes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .navlinks .hide-sm { display: none; }
+  }
+  @media (max-width: 560px) {
+    body { font-size: 17px; }
+    section { padding: 72px 0; }
+    .modes { grid-template-columns: 1fr; }
+    .demo-mascot { width: 150px; }
+    .shelf { display: none; }
+    .navlinks { gap: 14px; }
+    .brand small { display: none; }
+    .hero h1 { font-size: 40px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .opt.pick { background: var(--peach); border-color: var(--ink); color: var(--peach-text); }
+    .opt.right { background: var(--mint-tint); border-color: var(--ink); color: var(--mint-text); font-weight: 700; }
+    .opt .x-mark, .opt .c-mark { opacity: 1; }
+    .toast { opacity: 1; }
+    .cursor { display: none; }
+  }
 </style>
 </head>
 <body>
+
+<nav aria-label="Main">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="assets/tuck-mascot.png" alt=""><span>Tuck<small>for learners</small></span></a>
+    <div class="navlinks">
+      <a class="hide-sm" href="#how">How it works</a>
+      <a class="hide-sm" href="#try">Try it</a>
+      <a href="privacy/">Privacy</a>
+      <a href="support/">Support</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">A study buddy for your online homework</p>
+      <h1>Study the questions<br>you <em>actually missed.</em></h1>
+      <p class="lead">Tuck quietly saves every homework question you answer on SmartBook and InQuizitive, so before the exam you study your mistakes, not the whole chapter.</p>
+      <div class="ctas">
+        <a class="btn" href="[CHROME WEB STORE LINK]" aria-disabled="true" id="store-btn">Add to Chrome · coming soon</a>
+        <a class="btn secondary" href="#try">Try a sample question</a>
+      </div>
+      <p class="fine"><strong>Free.</strong> No account. Everything stays in your browser.</p>
+    </div>
+
+    <div class="demo-stage" aria-label="Animation: a missed homework question being saved to Tuck" role="img">
+      <div class="card q-card">
+        <div class="q-meta"><span>Homework · Question 7</span><span>Ch. 3: Memory</span></div>
+        <p class="q-text">Testing yourself instead of rereading your notes is called:</p>
+        <div class="opt"><span class="mark"></span>highlighting</div>
+        <div class="opt pick"><span class="mark x-mark">✗</span>massed practice</div>
+        <div class="opt right"><span class="mark c-mark">✓</span>retrieval practice</div>
+        <div class="opt"><span class="mark"></span>summarizing</div>
+      </div>
+      <svg class="cursor" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2 L4 20 L9 15 L12.5 22 L15.5 20.5 L12 13.8 L19 13.8 Z" fill="#FFFFFF" stroke="#1D2B4A" stroke-width="2" stroke-linejoin="round"/></svg>
+      <div class="shelf" aria-hidden="true">
+        <div class="note" style="background: var(--yellow-tint); transform: rotate(-4deg)">Ch. 1</div>
+        <div class="note" style="background: var(--peach); transform: rotate(3deg)">Ch. 2</div>
+        <div class="note" style="background: var(--mint-tint); transform: rotate(-2deg)">Ch. 3</div>
+      </div>
+      <div class="note toast"><span aria-hidden="true">🌰</span>Tucked away for exam day</div>
+      <img class="demo-mascot" src="assets/tuck-mascot.png" alt="">
+    </div>
+  </div>
+</header>
+
 <main>
-  <h1>Tuck for Learners</h1>
-  <p><a href="support/">Support</a></p>
-  <p><a href="privacy/">Privacy policy</a></p>
+  <section id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">How it works</p>
+        <h2>Do your homework. Tuck does the remembering.</h2>
+        <p>No copying questions into flashcards, no screenshots, no new habits. Just study better when it counts.</p>
+      </div>
+      <div class="steps">
+        <div class="note step"><div class="num">1</div><h3>Answer as usual</h3><p>Work through your SmartBook or InQuizitive assignment like always. Tuck runs quietly in the background.</p></div>
+        <div class="note step"><div class="num">2</div><h3>Tuck saves it</h3><p>After you answer, Tuck saves the question, the right answer, your answer and the explanation, sorted by course and chapter.</p></div>
+        <div class="note step"><div class="num">3</div><h3>Study what you missed</h3><p>Before the exam, press Study now. Tuck starts with your misses and marks questions mastered as you get them right.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="try" class="try">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Try it</p>
+        <h2>This is what studying with Tuck feels like.</h2>
+        <p>Three sample questions about studying itself. Miss one and watch it land in "to review".</p>
+      </div>
+      <div class="try-grid">
+        <div class="card quiz" id="quiz" aria-live="polite"></div>
+        <div class="side">
+          <div class="tiles" aria-label="Your sample stats">
+            <div class="tile"><b id="t-saved">0</b><span>saved</span></div>
+            <div class="tile"><b id="t-review">0</b><span>to review</span></div>
+            <div class="tile"><b id="t-mastered">0</b><span>mastered</span></div>
+          </div>
+          <div class="card">
+            <h3>In the real thing</h3>
+            <p>Your questions come straight from your own homework, grouped by course and chapter, with your history on each one. Misses come first; questions you've nailed twice in a row move to mastered.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="modes">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Study modes</p>
+        <h2>One click to start. Four ways to study.</h2>
+        <p>Each mode is built on how memory actually works: testing yourself, mixing topics, and explaining ideas in your own words.</p>
+      </div>
+      <div class="modes">
+        <div class="card mode primary">
+          <div class="viz" aria-hidden="true">
+            <div class="chip" style="left:14px;top:16px;background:var(--peach)"></div>
+            <div class="chip" style="left:60px;top:16px;background:var(--peach)"></div>
+            <div class="chip" style="left:106px;top:16px;background:var(--yellow-tint)"></div>
+            <div class="chip" style="left:152px;top:16px;background:var(--yellow-tint)"></div>
+            <div class="bar" style="top:66px"></div>
+            <div class="bar" style="top:66px;right:auto;width:45%;background:var(--ink)"></div>
+          </div>
+          <h3>Study now</h3><p>Your missed questions first, mixed across chapters, with feedback after each one.</p>
+        </div>
+        <div class="card mode">
+          <div class="viz" aria-hidden="true">
+            <div class="chip" style="left:14px;top:14px;width:60px;background:var(--paper);border-radius:15px"></div>
+            <span style="position:absolute;left:24px;top:18px;font-weight:700;font-size:14px">9:40</span>
+            <div class="bar" style="top:56px"></div><div class="bar" style="top:80px;right:40%"></div>
+          </div>
+          <h3>Practice exam</h3><p>No feedback until the end, with an optional timer. Then see your weakest chapter.</p>
+        </div>
+        <div class="card mode">
+          <div class="viz" aria-hidden="true">
+            <div class="note" style="position:absolute;left:14px;top:14px;right:40px;padding:8px 10px;font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--paper);box-shadow:2px 2px 0 var(--ink)">Because testing…</div>
+            <div class="bar" style="top:72px;right:30%;background:var(--mint-tint)"></div>
+          </div>
+          <h3>Explain why</h3><p>Put the answer in your own words first, then compare it with the real explanation.</p>
+        </div>
+        <div class="card mode">
+          <div class="viz" aria-hidden="true">
+            <div class="chip" style="left:14px;top:38px;background:var(--yellow-tint);transform:rotate(-6deg)"></div>
+            <div class="chip" style="left:58px;top:30px;background:var(--mint-tint);transform:rotate(5deg)"></div>
+            <div class="chip" style="left:102px;top:40px;background:var(--peach);transform:rotate(-3deg)"></div>
+            <div class="chip" style="left:146px;top:32px;background:var(--yellow-tint);transform:rotate(7deg)"></div>
+          </div>
+          <h3>Mixed practice</h3><p>Switches between chapters so you learn to tell similar ideas apart.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="privacy" style="padding-top: 24px">
+    <div class="wrap privacy-grid">
+      <div class="note lock">
+        <div class="big">Your mistakes are nobody's business.</div>
+        <p>Tuck has no servers. Your questions never leave your browser.</p>
+      </div>
+      <div>
+        <p class="eyebrow">Private by design</p>
+        <h2 style="font-size: clamp(30px, 3.6vw, 42px)">A study tool, not a cheat tool.</h2>
+        <ul class="checks">
+          <li>Saves questions only after you've answered them.</li>
+          <li>Never shows answers during an assignment and never fills anything in.</li>
+          <li>No accounts, no tracking, no ads. Export or delete your data any time.</li>
+        </ul>
+        <div class="works" aria-label="Works with">
+          <div class="note" style="transform: rotate(-1.5deg)">McGraw Hill SmartBook</div>
+          <div class="note" style="transform: rotate(1.5deg)">Norton InQuizitive</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <img src="assets/tuck-mascot.png" alt="Tuck the squirrel holding an acorn">
+      <h2>Exam season is coming.<br>Tuck is almost here.</h2>
+      <p>Tuck is waiting for Chrome Web Store approval. Check back soon, or get in touch.</p>
+      <a class="btn" href="mailto:ttuck.it.ai@gmail.com">Email us</a>
+    </div>
+  </section>
 </main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Tuck for Learners</span>
+    <nav aria-label="Footer">
+      <a href="privacy/">Privacy policy</a>
+      <a href="support/">Support</a>
+      <a href="mailto:ttuck.it.ai@gmail.com">ttuck.it.ai@gmail.com</a>
+    </nav>
+    <p class="legal">Tuck for Learners is an independent project and is not affiliated with, endorsed by or sponsored by McGraw Hill or W. W. Norton &amp; Company. SmartBook and InQuizitive are trademarks of their respective owners.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // Store button stays inert until the real Chrome Web Store link is filled in.
+  var storeBtn = document.getElementById('store-btn');
+  if (storeBtn.getAttribute('href').indexOf('[') === 0) {
+    storeBtn.removeAttribute('href');
+  } else {
+    storeBtn.removeAttribute('aria-disabled');
+    storeBtn.textContent = 'Add to Chrome · it’s free';
+  }
+
+  var QUESTIONS = [
+    { q: 'Testing yourself instead of rereading your notes is called:',
+      choices: ['highlighting', 'retrieval practice', 'massed practice', 'summarizing'], answer: 1,
+      why: 'Pulling an answer out of memory strengthens it far more than reading it again. Every Tuck quiz is retrieval practice.' },
+    { q: 'Spreading your study sessions out over several days, instead of cramming the night before, is called:',
+      choices: ['spaced practice', 'chunking', 'interleaving', 'overlearning'], answer: 0,
+      why: 'Short sessions spread over time beat one long cram session for remembering things on exam day.' },
+    { q: 'Mixing questions from different chapters in one study session, instead of doing one chapter at a time, is called:',
+      choices: ['blocking', 'skimming', 'interleaving', 'priming'], answer: 2,
+      why: 'Switching topics makes you figure out which idea applies, which is exactly what an exam asks you to do. That’s Tuck’s Mixed practice mode.' }
+  ];
+  var MASCOT = document.querySelector('.final img').getAttribute('src');
+  var quiz = document.getElementById('quiz');
+  var i = 0, missed = 0, right = 0;
+
+  function tiles() {
+    document.getElementById('t-saved').textContent = i + (quiz.dataset.answered === '1' ? 1 : 0);
+    document.getElementById('t-review').textContent = missed;
+    document.getElementById('t-mastered').textContent = right;
+  }
+
+  function render() {
+    quiz.dataset.answered = '0';
+    if (i >= QUESTIONS.length) {
+      quiz.innerHTML = '<div class="done"><img src="' + MASCOT + '" alt=""><h3>' +
+        (missed ? 'Nice. ' + missed + ' tucked away for review.' : 'Perfect run!') +
+        '</h3><p style="margin-top:10px;color:var(--muted)">With Tuck, these would be your own homework questions, waiting for you before the exam.</p>' +
+        '<div class="actions" style="justify-content:center"><button class="btn secondary" type="button" id="again">Try again</button></div></div>';
+      document.getElementById('again').addEventListener('click', function () { i = 0; missed = 0; right = 0; render(); tiles(); });
+      return;
+    }
+    var item = QUESTIONS[i];
+    var html = '<div class="top"><span class="progress">SAMPLE QUESTION ' + (i + 1) + ' OF ' + QUESTIONS.length + '</span><span class="pill">Study now</span></div>' +
+      '<p class="qtext">' + item.q + '</p><div class="choices">';
+    item.choices.forEach(function (c, n) {
+      html += '<button class="choice" type="button" data-n="' + n + '"><span class="key">' + (n + 1) + '</span><span>' + c + '</span></button>';
+    });
+    html += '</div><div id="after"></div>';
+    quiz.innerHTML = html;
+    Array.prototype.forEach.call(quiz.querySelectorAll('.choice'), function (b) {
+      b.addEventListener('click', function () { answer(parseInt(b.dataset.n, 10)); });
+    });
+  }
+
+  function answer(n) {
+    var item = QUESTIONS[i];
+    var ok = n === item.answer;
+    quiz.dataset.answered = '1';
+    if (ok) right++; else missed++;
+    Array.prototype.forEach.call(quiz.querySelectorAll('.choice'), function (b) {
+      var k = parseInt(b.dataset.n, 10);
+      b.disabled = true;
+      if (k === item.answer) { b.classList.add('is-right'); b.insertAdjacentHTML('beforeend', '<span class="tag">✓ correct</span>'); }
+      else if (k === n) { b.classList.add('is-wrong'); b.insertAdjacentHTML('beforeend', '<span class="tag">✗ your answer</span>'); }
+    });
+    document.getElementById('after').innerHTML =
+      '<div class="feedback"><strong>' + (ok ? 'Nailed it.' : 'Not quite, and that’s the point.') + '</strong>' + item.why +
+      (ok ? '' : ' <em>Tuck would save this one for review.</em>') + '</div>' +
+      '<div class="actions"><button class="btn" type="button" id="next">' + (i + 1 < QUESTIONS.length ? 'Next question' : 'See results') + '</button></div>';
+    tiles();
+    var next = document.getElementById('next');
+    next.focus();
+    next.addEventListener('click', function () { i++; render(); tiles(); });
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (!quiz.contains(document.activeElement) && document.activeElement !== document.body) return;
+    var n = parseInt(e.key, 10);
+    if (n >= 1 && n <= 4 && quiz.dataset.answered === '0') {
+      var b = quiz.querySelector('.choice[data-n="' + (n - 1) + '"]');
+      if (b && isInView(quiz)) b.click();
+    }
+  });
+  function isInView(el) { var r = el.getBoundingClientRect(); return r.top < window.innerHeight && r.bottom > 0; }
+
+  render(); tiles();
+})();
+</script>
 </body>
 </html>
